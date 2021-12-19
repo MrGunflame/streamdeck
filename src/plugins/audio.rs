@@ -7,7 +7,6 @@ use crate::{
 };
 use async_trait::async_trait;
 use image::DynamicImage;
-use libpulse_binding::context::{subscribe::InterestMaskSet, Context};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
