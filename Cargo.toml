@@ -7,11 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-streamdeck = "0.4.8"
+streamdeck = "0.4.10"
 image = "0.23.14"
 chrono = "0.4.19"
-nix = "0.22.1"
+nix = "0.23.1"
 libpulse-binding = "2.25.0"
 obws = "0.8.0"
-tokio = { version = "1.11.0", features = ["full"] }
-async-trait = "0.1.51"
+tokio = { version = "1.15.0", features = ["full"] }
+async-trait = "0.1.52"
