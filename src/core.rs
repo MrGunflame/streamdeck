@@ -1,12 +1,13 @@
+use crate::typemap::TypeMap;
 use crate::{debug, info};
+
 use image::DynamicImage;
-use std::any::{Any, TypeId};
 use std::collections::HashMap;
 use std::convert::{From, Into};
 use std::error;
 use std::process;
 use std::result;
-use std::sync::{mpsc, Arc, RwLock, RwLockReadGuard};
+use std::sync::{mpsc, Arc, RwLock};
 use std::thread;
 use std::time::Duration;
 
@@ -16,108 +17,34 @@ pub type Result<T> = result::Result<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {
-    Streamdeck(streamdeck::Error),
-    BoxError(Box<dyn error::Error>),
+    BoxError(Box<dyn error::Error + Sync + Send + 'static>),
+    /// No response from channel.
+    NoResponse,
+    Unknown,
 }
 
-impl From<streamdeck::Error> for Error {
-    fn from(err: streamdeck::Error) -> Self {
-        Self::Streamdeck(err)
-    }
-}
-
-pub struct TypeMap(HashMap<TypeId, Box<(dyn Any + Send + Sync)>>);
-
-impl TypeMap {
-    pub fn new() -> Self {
-        Self(HashMap::new())
-    }
-
-    pub fn get<T>(&self) -> Option<&T>
-    where
-        T: 'static,
-    {
-        self.0
-            .get(&TypeId::of::<T>())
-            .and_then(|b| b.downcast_ref::<T>())
-    }
-
-    pub fn get_mut<T>(&mut self) -> Option<&mut T>
-    where
-        T: 'static,
-    {
-        self.0
-            .get_mut(&TypeId::of::<T>())
-            .and_then(|b| b.downcast_mut::<T>())
-    }
-
-    pub fn insert<T>(&mut self, value: T)
-    where
-        T: Send + Sync + 'static,
-    {
-        self.0.insert(TypeId::of::<T>(), Box::new(value));
-    }
-
-    pub fn contains_key<T>(&self) -> bool
-    where
-        T: 'static,
-    {
-        self.0.contains_key(&TypeId::of::<T>())
+impl<T> From<T> for Error
+where
+    T: std::error::Error + Sync + Send + 'static,
+{
+    fn from(err: T) -> Self {
+        Self::BoxError(Box::new(err))
     }
 }
 
 #[derive(Clone)]
 pub struct State {
     pub buttons: Arc<RwLock<HashMap<u8, ButtonWrapper>>>,
-    pub shared_data: Arc<RwLock<TypeMap>>,
+    pub typemap: Arc<RwLock<TypeMap>>,
 }
 
 impl State {
     pub fn new() -> Self {
         Self {
             buttons: Arc::new(RwLock::new(HashMap::new())),
-            shared_data: Arc::new(RwLock::new(TypeMap::new())),
+            typemap: Arc::new(RwLock::new(TypeMap::new())),
         }
     }
-
-    /// WIP
-    // pub fn get<T>(&mut self) -> RwLockReadGuard<&T>
-    // where
-    //     T: 'static,
-    // {
-    //     let shared_data = self.shared_data.read().unwrap();
-
-    //     shared_data.get(&TypeId::of::<T>())
-    // }
-
-    pub fn type_of<T>() -> TypeId
-    where
-        T: 'static,
-    {
-        TypeId::of::<T>()
-    }
-
-    pub fn exists<T>(&self) -> bool
-    where
-        T: 'static,
-    {
-        let shared_data = self.shared_data.read().unwrap();
-
-        shared_data.contains_key::<T>()
-    }
-
-    pub fn insert<T>(&mut self, value: T)
-    where
-        T: Any + Send + Sync + 'static,
-    {
-        let mut shared_data = self.shared_data.write().unwrap();
-
-        shared_data.insert(value);
-    }
-}
-
-pub struct LOCK<'life0, T> {
-    lock: &'life0 RwLock<T>,
 }
 
 pub struct ButtonWrapper {

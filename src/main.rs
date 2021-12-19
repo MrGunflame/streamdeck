@@ -2,6 +2,7 @@ mod core;
 mod log;
 mod macros;
 mod plugins;
+mod typemap;
 
 use crate::core::NullButton;
 use crate::plugins::{audio, obs, screenshot, vlc};
