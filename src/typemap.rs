@@ -24,6 +24,7 @@ impl TypeMap {
 
     /// Returns a mutable reference to the value of the type
     /// `T`.
+    #[allow(dead_code)]
     pub fn get_mut<T>(&mut self) -> Option<&mut T>
     where
         T: Any,
@@ -44,13 +45,14 @@ impl TypeMap {
 
     /// Removes and returns the value of the type `T` from the
     /// TypeMap.
+    #[allow(dead_code)]
     pub fn remove<T>(&mut self) -> Option<T>
     where
         T: Any,
     {
         self.0
             .remove(&TypeId::of::<T>())
-            .and_then(|b| Some(*b.downcast::<T>().unwrap()))
+            .map(|b| *b.downcast::<T>().unwrap())
     }
 
     /// Returns `true` if the TypeMap contains an item of the

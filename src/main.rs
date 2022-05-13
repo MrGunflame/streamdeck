@@ -9,7 +9,6 @@ use crate::plugins::{audio, obs, screenshot, vlc};
 
 const VID: u16 = 0x0fd9;
 const PID: u16 = 0x006c;
-const SERIAL: &str = "CL17K1A01109";
 
 #[tokio::main]
 async fn main() {
@@ -69,7 +68,13 @@ mod pactl {
 
     impl Display for Error {
         fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-            write!(f, "{}", "")
+            write!(
+                f,
+                "{}",
+                match self {
+                    Self::DeserializeError => "DeserializeError",
+                }
+            )
         }
     }
 
@@ -251,12 +256,7 @@ mod pactl {
                             b"Sample Specification" => sink.driver = string_from_slice(parts[1]),
                             b"Channel Map" => sink.channel_map = string_from_slice(parts[1]),
                             b"Owner Module" => sink.owner_module = string_from_slice(parts[1]),
-                            b"Mute" => {
-                                sink.mute = match parts[1] {
-                                    b"yes" => true,
-                                    _ => false,
-                                }
-                            }
+                            b"Mute" => sink.mute = matches!(parts[1], b"yes"),
                             b"Volume" => sink.volume = string_from_slice(parts[1]),
                             b"Monitor Source" => sink.monitor_source = string_from_slice(parts[1]),
                             b"Latency" => sink.latency = string_from_slice(parts[1]),
@@ -315,6 +315,7 @@ mod pactl {
         Ok(sinks)
     }
 
+    #[allow(dead_code)]
     pub enum MuteAction {
         On,
         Off,
@@ -367,13 +368,13 @@ macro_rules! buttons {
     ($($button:ty),*$(,)?) => {{
         let mut buttons = ::std::collections::HashMap::new();
 
-        let mut i = 0;
+        let mut _i = 0;
         $(
-            debug!("Key {} is {:?}", i, std::any::type_name::<$button>());
+            debug!("Key {} is {:?}", _i, std::any::type_name::<$button>());
 
-            buttons.insert(i, $crate::core::ButtonWrapper::new(Box::new(<$button>::default())));
+            buttons.insert(_i, $crate::core::ButtonWrapper::new(Box::new(<$button>::default())));
 
-            i += 1;
+            _i += 1;
         )*
 
         ::std::sync::Arc::new(::std::sync::RwLock::new(buttons))

@@ -53,11 +53,11 @@ impl Default for FlameshotButton {
 
 #[async_trait]
 impl Button for FlameshotButton {
-    async fn init(&mut self, state: &mut State, key: Key) -> Result<()> {
+    async fn init(&mut self, _state: &mut State, key: Key) -> Result<()> {
         key.image(self.icon.clone())
     }
 
-    async fn on_click(&mut self, state: &mut State, key: Key) -> Result<()> {
+    async fn on_click(&mut self, _state: &mut State, _key: Key) -> Result<()> {
         Command::new("flameshot").arg("gui").output().unwrap();
         Ok(())
     }

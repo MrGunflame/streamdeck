@@ -20,7 +20,6 @@ pub enum Error {
     BoxError(Box<dyn error::Error + Sync + Send + 'static>),
     /// No response from channel.
     NoResponse,
-    Unknown,
 }
 
 impl<T> From<T> for Error

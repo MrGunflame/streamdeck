@@ -11,7 +11,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 const DEFAULT_SINK: &str = "alsa_output.pci-0000_0a_00.4.analog-stereo";
-const DEFAULT_SOURCE: &str = "";
 
 /// Deafen/Undeafen the system-wide audio output stream.
 #[derive(Clone, Debug)]
@@ -69,12 +68,7 @@ impl Button for DeafenButton {
                 loop {
                     while let Ok(event) = pactl_subscription.read_event() {
                         // Ony listen on sink changes.
-                        if event.0 == Event::Change
-                            && match event.1 {
-                                EventDst::Sink(_) => true,
-                                _ => false,
-                            }
-                        {
+                        if event.0 == Event::Change && matches!(event.1, EventDst::Sink(_)) {
                             // Get all sinks.
                             let sinks = list_sinks().unwrap();
                             // Find the default sink.

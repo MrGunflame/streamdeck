@@ -32,7 +32,7 @@ enum Message {
 }
 
 impl OBSClient {
-    async fn new(state: &mut State) -> std::result::Result<(), obws::Error> {
+    async fn insert_new(state: &mut State) -> std::result::Result<(), obws::Error> {
         // Skip adding a new `OBSClient` when one already exists
         // in the typemap.
         let typemap = state.typemap.read().unwrap();
@@ -66,19 +66,19 @@ impl OBSClient {
                         Message::RecordingStatus(tx) => {
                             let res = client.recording().get_recording_status().await;
 
-                            let res = res.or_else(|e| Err(e.into()));
+                            let res = res.map_err(|err| err.into());
                             let _ = tx.send(res);
                         }
                         Message::RecordingStart(tx) => {
                             let res = client.recording().start_recording().await;
 
-                            let res = res.or_else(|e| Err(e.into()));
+                            let res = res.map_err(|err| err.into());
                             let _ = tx.send(res);
                         }
                         Message::RecordingStop(tx) => {
                             let res = client.recording().stop_recording().await;
 
-                            let res = res.or_else(|e| Err(e.into()));
+                            let res = res.map_err(|err| err.into());
                             let _ = tx.send(res);
                         }
 
@@ -146,7 +146,7 @@ pub struct RecordingButton {}
 #[async_trait]
 impl Button for RecordingButton {
     async fn init(&mut self, state: &mut State, key: Key) -> Result<()> {
-        OBSClient::new(state).await.unwrap();
+        OBSClient::insert_new(state).await.unwrap();
 
         key.color((0, 0, 250))
     }
@@ -184,7 +184,7 @@ impl Default for SaveReplayBufferButton {
 #[async_trait]
 impl Button for SaveReplayBufferButton {
     async fn init(&mut self, state: &mut State, key: Key) -> Result<()> {
-        OBSClient::new(state).await.unwrap();
+        OBSClient::insert_new(state).await.unwrap();
 
         key.image(self.icon.clone())
     }
