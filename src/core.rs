@@ -11,7 +11,7 @@ use std::sync::{mpsc, Arc, RwLock};
 use std::thread;
 use std::time::Duration;
 
-const POLLING_RATE: Duration = Duration::from_millis(500);
+const POLLING_RATE: Duration = Duration::from_millis(125);
 
 pub type Result<T> = result::Result<T, Error>;
 
@@ -92,6 +92,8 @@ pub async fn main_loop(vid: u16, pid: u16, serial: Option<String>, mut state: St
 
     let buttons = state.buttons.clone();
     for (key, button) in buttons.write().unwrap().iter_mut() {
+        debug!("Initializing key {}", key);
+
         match button.exec_init(*key, deck.clone(), &mut state).await {
             Ok(()) => (),
             Err(err) => println!("[ERROR] Failed to initialize key {}: {:?}", key, err),
@@ -253,6 +255,7 @@ impl From<Color> for streamdeck::Colour {
 }
 
 /// A button that does nothing.
+#[derive(Debug)]
 pub struct NullButton;
 
 impl Default for NullButton {

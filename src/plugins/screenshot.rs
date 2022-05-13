@@ -8,6 +8,7 @@ use std::{env, process::Command};
 
 /// A button to screenshot the full desktop using the falmeshot cli.
 /// Saves the images in $HOME/Pictures.
+#[derive(Debug)]
 pub struct FullScreenshotButton {
     icon: DynamicImage,
 }
@@ -33,6 +34,31 @@ impl Button for FullScreenshotButton {
             .args(&["full", "-p", &path])
             .output()
             .unwrap();
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub struct FlameshotButton {
+    icon: DynamicImage,
+}
+
+impl Default for FlameshotButton {
+    fn default() -> Self {
+        let icon = load_icon!("../../icons/screenshot/screenshot.png");
+
+        Self { icon }
+    }
+}
+
+#[async_trait]
+impl Button for FlameshotButton {
+    async fn init(&mut self, state: &mut State, key: Key) -> Result<()> {
+        key.image(self.icon.clone())
+    }
+
+    async fn on_click(&mut self, state: &mut State, key: Key) -> Result<()> {
+        Command::new("flameshot").arg("gui").output().unwrap();
         Ok(())
     }
 }

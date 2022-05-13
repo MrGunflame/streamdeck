@@ -14,7 +14,7 @@ const DEFAULT_SINK: &str = "alsa_output.pci-0000_0a_00.4.analog-stereo";
 const DEFAULT_SOURCE: &str = "";
 
 /// Deafen/Undeafen the system-wide audio output stream.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DeafenButton {
     mute: Arc<AtomicBool>,
     icons: [DynamicImage; 2],
@@ -104,6 +104,7 @@ impl Button for DeafenButton {
     }
 }
 
+#[derive(Debug)]
 pub struct MuteButton {
     mute: bool,
     icons: [DynamicImage; 2],

@@ -7,7 +7,7 @@ mod typemap;
 use crate::core::NullButton;
 use crate::plugins::{audio, obs, screenshot, vlc};
 
-const VIP: u16 = 0x0fd9;
+const VID: u16 = 0x0fd9;
 const PID: u16 = 0x006c;
 const SERIAL: &str = "CL17K1A01109";
 
@@ -22,7 +22,7 @@ async fn main() {
         NullButton,
         NullButton,
         NullButton,
-        NullButton,
+        screenshot::FlameshotButton,
         screenshot::FullScreenshotButton,
         obs::SaveReplayBufferButton,
         NullButton,
@@ -50,7 +50,7 @@ async fn main() {
         NullButton,
     };
 
-    core::main_loop(VIP, PID, None, state).await;
+    core::main_loop(VID, PID, None, state).await;
 }
 
 mod pactl {
@@ -369,6 +369,8 @@ macro_rules! buttons {
 
         let mut i = 0;
         $(
+            debug!("Key {} is {:?}", i, std::any::type_name::<$button>());
+
             buttons.insert(i, $crate::core::ButtonWrapper::new(Box::new(<$button>::default())));
 
             i += 1;

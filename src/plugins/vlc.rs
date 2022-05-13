@@ -6,6 +6,7 @@ use async_trait::async_trait;
 use image::DynamicImage;
 use std::process::Command;
 
+#[derive(Debug)]
 pub struct PlayPauseButton {
     pause: bool,
     icons: [DynamicImage; 2],
@@ -49,6 +50,7 @@ impl Button for PlayPauseButton {
     }
 }
 
+#[derive(Debug)]
 pub struct NextButton {
     icon: DynamicImage,
 }
@@ -77,6 +79,7 @@ impl Button for NextButton {
     }
 }
 
+#[derive(Debug)]
 pub struct PreviousButton {
     icon: DynamicImage,
 }
