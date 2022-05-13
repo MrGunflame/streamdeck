@@ -15,11 +15,11 @@ const OBS_CLIENT_HOST: &str = "127.0.0.1";
 const OBS_CLIENT_PORT: u16 = 4444;
 
 /// Try to reconnect even n seconds if the connection failed.
-const OBS_CLIENT_RECONNECT: Option<Duration> = Some(Duration::from_secs(60));
+const OBS_CLIENT_RECONNECT: Option<Duration> = None;
 
 /// OBS WebSocket client shared between all buttons. Used to communicate
 /// with OBS using just a single connection.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct OBSClient {
     tx: mpsc::Sender<Message>,
 }
@@ -39,9 +39,11 @@ impl OBSClient {
         if typemap.contains_key::<Self>() {
             return Ok(());
         }
+        drop(typemap);
 
         let mut typemap = state.typemap.write().unwrap();
         let (tx, mut rx) = mpsc::channel(32);
+
         task::spawn(async move {
             // let client = Client::connect(OBS_CLIENT_HOST, OBS_CLIENT_PORT).await;
 
@@ -138,6 +140,7 @@ impl OBSClient {
 
 /// A button to toggle the current recording status
 /// in OBS.
+#[derive(Debug)]
 pub struct RecordingButton {}
 
 #[async_trait]
@@ -165,6 +168,7 @@ impl Button for RecordingButton {
 }
 
 /// Save and flush the current replay buffer it it exists.
+#[derive(Debug)]
 pub struct SaveReplayBufferButton {
     icon: DynamicImage,
 }
